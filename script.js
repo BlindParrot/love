@@ -1,18 +1,56 @@
+const questCard = document.getElementById('questCard');
+const mainCard = document.getElementById('mainCard');
+const answerInput = document.getElementById('answerInput');
+const unlockBtn = document.getElementById('unlockBtn');
+const errorMsg = document.getElementById('errorMsg');
+
 const noBtn = document.getElementById('noBtn');
 const yesBtn = document.getElementById('yesBtn');
-const card = document.getElementById('card');
-const sushiContainer = document.getElementById('sushiContainer');
 const title = document.getElementById('title');
+const heartsContainer = document.getElementById('heartsContainer');
 
-// Массив со вкусняшками, которые будут падать
-const sushiMenu = ['🍣', '🍱', '🍤', '🥢', '🍙'];
-
+// Начальное положение кнопки "Нет"
 noBtn.style.left = '160px';
 noBtn.style.top = '0px';
 
-// 1. Кнопка "Не хочу" убегает
+// Логика проверки загадки
+unlockBtn.addEventListener('click', checkAnswer);
+answerInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') checkAnswer();
+});
+
+function checkAnswer() {
+    const userAnswer = answerInput.value.trim().toLowerCase();
+    
+    if (userAnswer.includes('сердце') || userAnswer.includes('сердечко')) {
+        errorMsg.style.display = 'none';
+        
+        // Эффектное исчезновение квеста
+        questCard.style.opacity = '0';
+        questCard.style.transform = 'scale(0.8) translateY(-30px)';
+        
+        // ЧЕТКОЕ ИСПРАВЛЕНИЕ: полностью убираем первую карточку из документа, чтобы она не маячила слева
+        setTimeout(() => {
+            questCard.style.display = 'none'; 
+            
+            // Плавно показываем основное признание
+            mainCard.classList.remove('hidden');
+            mainCard.style.position = 'relative'; // Выстраиваем по центру экрана
+            mainCard.style.opacity = '1';
+            mainCard.style.transform = 'scale(1) translateY(0)';
+        }, 400);
+        
+    } else {
+        errorMsg.style.display = 'block';
+        // Легкая анимация тряски при ошибке
+        questCard.style.animation = 'none';
+        setTimeout(() => { questCard.style.animation = 'pulse 0.3s ease 2'; }, 10);
+    }
+}
+
+// Кнопка "Нет" убегает
 noBtn.addEventListener('mouseover', () => {
-    const padding = 20;
+    const padding = 30;
     const maxX = window.innerWidth - noBtn.offsetWidth - padding;
     const maxY = window.innerHeight - noBtn.offsetHeight - padding;
     
@@ -24,37 +62,32 @@ noBtn.addEventListener('mouseover', () => {
     noBtn.style.top = `${randomY}px`;
 });
 
-// 2. Функция генерации случайного ролла
-function createSushi() {
-    const sushi = document.createElement('div');
-    sushi.classList.add('sushi-item');
+// Генерация падающих сердечек
+function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
     
-    // Выбираем случайный смайлик из массива
-    const randomIcon = sushiMenu[Math.floor(Math.random() * sushiMenu.length)];
-    sushi.innerHTML = randomIcon;
+    const heartTypes = ['❤️', '💖', '💝', '💕', '🥰'];
+    heart.innerHTML = heartTypes[Math.floor(Math.random() * heartTypes.length)];
     
-    sushi.style.left = Math.random() * 100 + 'vw';
-    sushi.style.fontSize = Math.random() * 20 + 20 + 'px';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.fontSize = Math.random() * 20 + 15 + 'px';
     
-    const duration = Math.random() * 3 + 3;
-    sushi.style.animationDuration = duration + 's';
+    const duration = Math.random() * 2 + 3;
+    heart.style.animationDuration = duration + 's';
     
-    sushiContainer.appendChild(sushi);
+    heartsContainer.appendChild(heart);
     
-    setTimeout(() => {
-        sushi.remove();
-    }, duration * 1000);
+    setTimeout(() => { heart.remove(); }, duration * 1000);
 }
 
-// 3. Обработка согласия
+// Кнопка "ДА"
 yesBtn.addEventListener('click', () => {
     noBtn.remove();
-    
-    // Меняем текст на победный
-    title.innerHTML = 'Ура! Заказываем Филадельфию! Напиши мне, во сколько собираемся! 🥢🎉';
+    title.innerHTML = 'Ура-а-а! Ты делаешь меня самым счастливым! 🥰 Посмотри в окно или напиши мне скорее! 💖';
     yesBtn.style.display = 'none';
-    card.style.transform = 'scale(1.1)';
+    mainCard.style.transform = 'scale(1.05)';
+    mainCard.style.borderColor = '#ff4d6d';
     
-    // Включаем суши-дождь
-    setInterval(createSushi, 80);
+    setInterval(createHeart, 60);
 });

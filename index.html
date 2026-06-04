@@ -15,10 +15,8 @@
         <div class="score-board">Шкала любви: <span id="score">0</span> / 10 💕</div>
         
         <div class="game-area" id="gameArea">
-            <!-- Сюда будут падать сердечки -->
             <div class="player-basket" id="playerBasket">🧺</div>
             
-            <!-- Мобильное оверлей-меню старта -->
             <div class="start-overlay" id="startOverlay">
                 <button id="startBtn">ИГРАТЬ 🎮</button>
             </div>
@@ -36,7 +34,10 @@
         </div>
     </div>
 
-    <script src="https://jsdelivr.net"></script>
+    <!-- ОПТИМИЗАЦИЯ: Сначала мгновенно запускаем саму игру -->
     <script src="script.js"></script>
+    
+    <!-- А тяжелые спецэффекты догрузятся в фоне сами по себе, не тормозя старт -->
+    <script src="https://jsdelivr.net" async></script>
 </body>
 </html>

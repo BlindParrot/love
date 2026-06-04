@@ -23,27 +23,25 @@ const itemTypes = [
     { text: '💔', type: 'bad', score: -1 }
 ];
 
-// Управление для мобилок и ПК без лагов через Pointer Events
 gameArea.addEventListener('pointermove', (e) => {
     if (gameOver) return;
     const rect = gameArea.getBoundingClientRect();
     let x = e.clientX - rect.left;
     
-    // Держим корзинку внутри игрового поля
     if (x < 30) x = 30;
     if (x > rect.width - 30) x = rect.width - 30;
     
     playerBasket.style.left = `${x}px`;
 });
 
-// Кнопка ИГРАТЬ (работает по первому касанию)
+// Кнопка ИГРАТЬ (теперь реагирует моментально)
 startBtn.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     startOverlay.style.opacity = '0';
     setTimeout(() => {
         startOverlay.style.display = 'none';
         startGame();
-    }, 300);
+    }, 150); // Уменьшили задержку анимации меню
 });
 
 function startGame() {
@@ -51,9 +49,7 @@ function startGame() {
     score = 0;
     scoreEl.innerText = score;
     
-    // Запускаем спавн предметов
     spawnInterval = setInterval(createFallingItem, 750);
-    // Запускаем обсчет физики (60 кадров в секунду)
     gameLoopInterval = setInterval(updateItems, 1000 / 60);
 }
 
@@ -83,13 +79,11 @@ function updateItems() {
     
     items.forEach(item => {
         let currentTop = parseFloat(item.style.top);
-        // Скорость падения
         currentTop += 3.5; 
         item.style.top = `${currentTop}px`;
         
         const itemRect = item.getBoundingClientRect();
         
-        // Проверка коллизии (пересечения с корзинкой)
         if (itemRect.bottom >= basketRect.top && 
             itemRect.top <= basketRect.bottom && 
             itemRect.right >= basketRect.left && 
@@ -106,7 +100,6 @@ function updateItems() {
             }
         }
         
-        // Если улетел ниже экрана
         if (currentTop > gameArea.clientHeight) {
             item.remove();
         }
@@ -118,10 +111,14 @@ function triggerVictory() {
     clearInterval(spawnInterval);
     clearInterval(gameLoopInterval);
     
-    // Удаляем все оставшиеся предметы на поле
     document.querySelectorAll('.falling-item').forEach(el => el.remove());
     
-    confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+    // Безопасный вызов салюта
+    if (typeof confetti === 'function') {
+        try {
+            confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+        } catch(err) {}
+    }
 
     gameWrapper.style.opacity = '0';
     gameWrapper.style.transform = 'scale(0.8)';
@@ -136,10 +133,9 @@ function triggerVictory() {
         noBtn.style.position = 'absolute';
         noBtn.style.left = '140px';
         noBtn.style.top = '0px';
-    }, 500);
+    }, 400);
 }
 
-// Убегающая кнопка "Нет" (с поддержкой тачей для телефонов)
 const moveNoButton = (e) => {
     if(e) e.preventDefault();
     const padding = 30;
@@ -178,12 +174,16 @@ yesBtn.addEventListener('pointerdown', (e) => {
     mainCard.style.transform = 'scale(1.05)';
     mainCard.style.borderColor = '#ff4d6d';
     
-    confetti({
-        particleCount: 200,
-        spread: 100,
-        origin: { y: 0.6 },
-        colors: ['#ff4d6d', '#ff758f', '#ff85a1', '#2ecc71']
-    });
+    if (typeof confetti === 'function') {
+        try {
+            confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#ff4d6d', '#ff758f', '#ff85a1', '#2ecc71']
+            });
+        } catch(err) {}
+    }
     
     setInterval(createHeart, 150);
 });

@@ -23,7 +23,7 @@ const itemTypes = [
     { text: '💔', type: 'bad', score: -1 }
 ];
 
-// Плавное управление пальцем/мышкой
+// Управление корзинкой
 gameArea.addEventListener('pointermove', (e) => {
     if (gameOver) return;
     const rect = gameArea.getBoundingClientRect();
@@ -35,7 +35,7 @@ gameArea.addEventListener('pointermove', (e) => {
     playerBasket.style.left = `${x}px`;
 });
 
-// Кнопка ИГРАТЬ запускается МГНОВЕННО
+// Старт игры
 startBtn.addEventListener('click', (e) => {
     e.preventDefault();
     startOverlay.style.display = 'none';
@@ -45,9 +45,8 @@ startBtn.addEventListener('click', (e) => {
 function startGame() {
     gameOver = false;
     score = 0;
-    scoreEl.innerText = score;
+    scoreEl.innerText = "0";
     
-    // Очищаем старые предметы, если были
     document.querySelectorAll('.falling-item').forEach(el => el.remove());
     
     spawnInterval = setInterval(createFallingItem, 700);
@@ -80,7 +79,7 @@ function updateItems() {
     
     items.forEach(item => {
         let currentTop = parseFloat(item.style.top);
-        currentTop += 4; // Чуть ускорили падение для фана
+        currentTop += 4; 
         item.style.top = `${currentTop}px`;
         
         const itemRect = item.getBoundingClientRect();
@@ -90,15 +89,20 @@ function updateItems() {
             itemRect.right >= basketRect.left && 
             itemRect.left <= basketRect.right) {
             
+            // Напрямую меняем числовую переменную в JS, это исключает любые баги
             score += parseInt(item.dataset.score);
             if (score < 0) score = 0;
+            
+            // Обновляем текст на экране
             scoreEl.innerText = score;
             
             item.remove();
             
+            // Проверяем победу по чистой переменной
             if (score >= 10) {
                 triggerVictory();
             }
+            return;
         }
         
         if (currentTop > gameArea.clientHeight) {
@@ -107,25 +111,23 @@ function updateItems() {
     });
 }
 
-// Собственный кастомный взрыв салюта на чистом JS
 function nativeConfetti() {
     const colors = ['🎉', '✨', '💖', '❤️', '💝', '🌸'];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 60; i++) {
         const particle = document.createElement('div');
         particle.innerHTML = colors[Math.floor(Math.random() * colors.length)];
         particle.style.position = 'fixed';
         particle.style.left = '50vw';
-        particle.style.top = '60vh';
+        particle.style.top = '50vh';
         particle.style.fontSize = Math.random() * 20 + 15 + 'px';
         particle.style.zIndex = '999';
         particle.style.pointerEvents = 'none';
-        particle.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
+        particle.style.transition = 'transform 0.8s ease-out, opacity 0.8s ease-out';
         
         document.body.appendChild(particle);
         
-        // Сила и направление взрыва во все стороны
         const angle = Math.random() * Math.PI * 2;
-        const velocity = Math.random() * 200 + 50;
+        const velocity = Math.random() * 150 + 50;
         const x = Math.cos(angle) * velocity;
         const y = Math.sin(angle) * velocity;
         
@@ -134,7 +136,7 @@ function nativeConfetti() {
             particle.style.opacity = '0';
         }, 50);
         
-        setTimeout(() => particle.remove(), 1050);
+        setTimeout(() => particle.remove(), 850);
     }
 }
 
@@ -145,7 +147,6 @@ function triggerVictory() {
     
     document.querySelectorAll('.falling-item').forEach(el => el.remove());
     
-    // Взрываем наш собственный салют
     nativeConfetti();
 
     gameWrapper.style.opacity = '0';

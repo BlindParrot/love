@@ -3,35 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Для тебя ❤️</title>
+    <title>Секретная игра ❤️</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="background-glow"></div>
     <div class="hearts-container" id="heartsContainer"></div>
 
-    <!-- Квест: Ввод кодового слова -->
-    <div class="card quest-card" id="questCard">
-        <div class="icon-lock">🔒</div>
-        <h2>Вход только для любимых девушек</h2>
-        <p class="riddle">Чтобы открыть замок, разгадай загадку:<br><strong>«Оно бьется чаще, когда ты рядом, и согревает в самый холодный день. Что это?»</strong></p>
-        
-        <div class="input-group">
-            <input type="text" id="answerInput" placeholder="Введите ответ..." autocomplete="off">
-            <button id="unlockBtn">Открыть 🔑</button>
-        </div>
-        <p class="error-msg" id="errorMsg">Не-а, попробуй еще раз! Подумай обо мне 😉</p>
+    <!-- Игровой экран (Canvas) -->
+    <div class="game-wrapper" id="gameWrapper">
+        <div class="score-board">Шкала любви: <span id="score">0</span> / 10 💕</div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="game-hint">Лови хорошие сердечки! Набери 10 очков Избегай 💔</div>
     </div>
 
-    <!-- Главная карточка (изначально скрыта) -->
+    <!-- Финальная карточка признания (изначально скрыта) -->
     <div class="card main-card hidden" id="mainCard">
-        <h1 id="title">Ну привет 🥰<br>У меня к тебе важный вопрос...<br><span style="font-size: 24px; display:block; margin-top:15px; color:#ff4d6d;">Ты будешь со мной? 💖</span></h1>
+        <h1 id="title">Ты прошла игру! 🏆<br>А теперь главный вопрос...<br><span style="font-size: 24px; display:block; margin-top:15px; color:#ff4d6d; text-shadow: 0 0 10px rgba(255,77,109,0.4);">Ты будешь со мной? 💖</span></h1>
         <div class="buttons">
             <button id="yesBtn">ДА! 👑</button>
             <button id="noBtn">Нет</button>
         </div>
     </div>
 
+    <!-- Библиотека взрыва конфетти -->
+    <script src="https://jsdelivr.net"></script>
     <script src="script.js"></script>
 </body>
 </html>

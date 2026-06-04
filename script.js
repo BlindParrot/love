@@ -1,16 +1,17 @@
 const noBtn = document.getElementById('noBtn');
 const yesBtn = document.getElementById('yesBtn');
 const card = document.getElementById('card');
-const heartsContainer = document.getElementById('heartsContainer');
+const sushiContainer = document.getElementById('sushiContainer');
 const title = document.getElementById('title');
 
-// Инициализируем начальное положение кнопки "Нет" внутри контейнера кнопок
+// Массив со вкусняшками, которые будут падать
+const sushiMenu = ['🍣', '🍱', '🍤', '🥢', '🍙'];
+
 noBtn.style.left = '160px';
 noBtn.style.top = '0px';
 
-// 1. Кнопка "Нет" убегает при наведении
+// 1. Кнопка "Не хочу" убегает
 noBtn.addEventListener('mouseover', () => {
-    // Вычисляем случайные координаты по всему экрану
     const padding = 20;
     const maxX = window.innerWidth - noBtn.offsetWidth - padding;
     const maxY = window.innerHeight - noBtn.offsetHeight - padding;
@@ -18,44 +19,42 @@ noBtn.addEventListener('mouseover', () => {
     const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
     const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
     
-    // Переводим кнопку в absolute относительно всего экрана
     noBtn.style.position = 'fixed';
     noBtn.style.left = `${randomX}px`;
     noBtn.style.top = `${randomY}px`;
 });
 
-// 2. Эффект падающих сердечек
-function createHeart() {
-    const heart = document.createElement('div');
-    heart.classList.add('heart');
-    heart.innerHTML = '❤️';
+// 2. Функция генерации случайного ролла
+function createSushi() {
+    const sushi = document.createElement('div');
+    sushi.classList.add('sushi-item');
     
-    // Случайная позиция по горизонтали и размер
-    heart.style.left = Math.random() * 100 + 'vw';
-    heart.style.fontSize = Math.random() * 20 + 15 + 'px';
+    // Выбираем случайный смайлик из массива
+    const randomIcon = sushiMenu[Math.floor(Math.random() * sushiMenu.length)];
+    sushi.innerHTML = randomIcon;
     
-    // Случайная скорость падения (от 3 до 6 секунд)
+    sushi.style.left = Math.random() * 100 + 'vw';
+    sushi.style.fontSize = Math.random() * 20 + 20 + 'px';
+    
     const duration = Math.random() * 3 + 3;
-    heart.style.animationDuration = duration + 's';
+    sushi.style.animationDuration = duration + 's';
     
-    heartsContainer.appendChild(heart);
+    sushiContainer.appendChild(sushi);
     
-    // Удаляем сердечко после окончания анимации
     setTimeout(() => {
-        heart.remove();
+        sushi.remove();
     }, duration * 1000);
 }
 
-// 3. Обработка согласия (нажатие на "ДА")
+// 3. Обработка согласия
 yesBtn.addEventListener('click', () => {
-    // Убираем кнопку "Нет" совсем
     noBtn.remove();
     
-    // Меняем текст и стили карточки
-    title.innerHTML = 'Ура-а-а! Я знал(а)! Люблю тебя! 💖<br><br><span style="font-size: 50px;">🥰</span>';
+    // Меняем текст на победный
+    title.innerHTML = 'Ура! Заказываем Филадельфию! Напиши мне, во сколько собираемся! 🥢🎉';
     yesBtn.style.display = 'none';
     card.style.transform = 'scale(1.1)';
     
-    // Запускаем мощный фонтан из сердечек
-    setInterval(createHeart, 100);
+    // Включаем суши-дождь
+    setInterval(createSushi, 80);
 });

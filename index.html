@@ -7,13 +7,27 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Контейнер для падающих сердечек -->
+    <div class="background-glow"></div>
     <div class="hearts-container" id="heartsContainer"></div>
 
-    <div class="card" id="card">
-        <h1 id="title">Ты будешь со мной? 💖</h1>
+    <!-- Квест: Ввод кодового слова -->
+    <div class="card quest-card" id="questCard">
+        <div class="icon-lock">🔒</div>
+        <h2>Вход только для любимых девушек</h2>
+        <p class="riddle">Чтобы открыть замок, разгадай загадку:<br><strong>«Оно бьется чаще, когда ты рядом, и согревает в самый холодный день. Что это?»</strong></p>
+        
+        <div class="input-group">
+            <input type="text" id="answerInput" placeholder="Введите ответ..." autocomplete="off">
+            <button id="unlockBtn">Открыть 🔑</button>
+        </div>
+        <p class="error-msg" id="errorMsg">Не-а, попробуй еще раз! Подумай обо мне 😉</p>
+    </div>
+
+    <!-- Главная карточка (изначально скрыта) -->
+    <div class="card main-card hidden" id="mainCard">
+        <h1 id="title">Ну привет 🥰<br>У меня к тебе важный вопрос...<br><span style="font-size: 24px; display:block; margin-top:15px; color:#ff4d6d;">Ты будешь со мной? 💖</span></h1>
         <div class="buttons">
-            <button id="yesBtn">ДА!</button>
+            <button id="yesBtn">ДА! 👑</button>
             <button id="noBtn">Нет</button>
         </div>
     </div>

@@ -9,26 +9,120 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: linear-gradient(135deg, #ffe6e6, #ffb3b3);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff0f3;
+    font-family: 'Segoe UI', Arial, sans-serif;
     overflow: hidden;
     position: relative;
 }
 
+/* Красивое неоновое свечение на фоне */
+.background-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,182,193,0.6) 0%, rgba(255,240,243,0) 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
 .card {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 40px 30px;
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(255, 77, 109, 0.15);
     text-align: center;
     z-index: 10;
-    transition: transform 0.3s ease;
+    width: 90%;
+    max-width: 440px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.icon-lock {
+    font-size: 50px;
+    margin-bottom: 15px;
+    animation: pulse 2s infinite;
+}
+
+h2 {
+    color: #ff4d6d;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.riddle {
+    color: #594d50;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #ffe3e8;
+    border-radius: 15px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+    text-align: center;
+}
+
+input:focus {
+    border-color: #ff4d6d;
+    box-shadow: 0 0 10px rgba(255, 47, 110, 0.1);
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#unlockBtn {
+    background: linear-gradient(45deg, #ff4d6d, #ff758f);
+    color: white;
+    box-shadow: 0 5px 15px rgba(255, 77, 109, 0.3);
+}
+
+#unlockBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(255, 77, 109, 0.4);
+}
+
+.error-msg {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 15px;
+    display: none;
+    font-weight: 500;
+}
+
+/* Стили главной карточки */
+.hidden {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+    pointer-events: none;
+    position: absolute;
 }
 
 h1 {
-    color: #d63031;
-    margin-bottom: 30px;
-    font-size: 28px;
+    color: #c9184a;
+    font-size: 26px;
+    line-height: 1.4;
 }
 
 .buttons {
@@ -37,22 +131,14 @@ h1 {
     gap: 20px;
     position: relative;
     min-height: 60px;
-}
-
-button {
-    padding: 15px 35px;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    margin-top: 30px;
 }
 
 #yesBtn {
-    background-color: #2ecc71;
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
     color: white;
-    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+    border-radius: 50px;
 }
 
 #yesBtn:hover {
@@ -60,17 +146,16 @@ button {
 }
 
 #noBtn {
-    background-color: #e74c3c;
-    color: white;
+    background-color: #ffb3c1;
+    color: #c9184a;
     position: absolute;
-    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+    border-radius: 50px;
 }
 
-/* Стили для падающих сердечек */
+/* Сердечки */
 .heart {
     position: absolute;
-    color: #ff4d6d;
-    font-size: 24px;
+    color: #ff758f;
     animation: fall linear forwards;
     opacity: 0.8;
     user-select: none;
@@ -78,12 +163,12 @@ button {
 }
 
 @keyframes fall {
-    0% {
-        transform: translateY(-50px) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(105vh) rotate(360deg);
-        opacity: 0;
-    }
+    0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
 }

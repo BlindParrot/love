@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Секретная игра ❤️</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -10,14 +10,22 @@
     <div class="background-glow"></div>
     <div class="hearts-container" id="heartsContainer"></div>
 
-    <!-- Игровой экран (Canvas) -->
+    <!-- Контейнер игры -->
     <div class="game-wrapper" id="gameWrapper">
         <div class="score-board">Шкала любви: <span id="score">0</span> / 10 💕</div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="game-hint">Лови хорошие сердечки! Набери 10 очков Избегай 💔</div>
+        
+        <div class="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+            <!-- Кнопка старта для браузеров -->
+            <div class="start-overlay" id="startOverlay">
+                <button id="startBtn">Играть 🎮</button>
+            </div>
+        </div>
+        
+        <div class="game-hint">Двигай корзинку! Набери 10 очков Избегай 💔</div>
     </div>
 
-    <!-- Финальная карточка признания (изначально скрыта) -->
+    <!-- Финальная карточка -->
     <div class="card main-card hidden" id="mainCard">
         <h1 id="title">Ты прошла игру! 🏆<br>А теперь главный вопрос...<br><span style="font-size: 24px; display:block; margin-top:15px; color:#ff4d6d; text-shadow: 0 0 10px rgba(255,77,109,0.4);">Ты будешь со мной? 💖</span></h1>
         <div class="buttons">
@@ -26,7 +34,6 @@
         </div>
     </div>
 
-    <!-- Библиотека взрыва конфетти -->
     <script src="https://jsdelivr.net"></script>
     <script src="script.js"></script>
 </body>

@@ -32,23 +32,23 @@ const player = {
     emoji: '🧺'
 };
 
-// Корректное считывание координат на ПК и мобилках
+// УНИВЕРСАЛЬНОЕ УПРАВЛЕНИЕ ДЛЯ ПК И ТЕЛЕФОНОВ
 const handleMove = (clientX) => {
     if (gameOver) return;
     const rect = canvas.getBoundingClientRect();
-    const rootX = clientX - rect.left;
+    // Вычисляем позицию относительно холста с учетом его реального масштаба на экране
+    const rootX = (clientX - rect.left) * (canvas.width / rect.width);
     player.x = rootX - player.width / 2;
     
+    // Ограничиваем движение рамками экрана
     if (player.x < 0) player.x = 0;
     if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
 };
 
-window.addEventListener('mousemove', (e) => handleMove(e.clientX));
-window.addEventListener('touchmove', (e) => {
-    if (e.touches.length > 0) {
-        handleMove(e.touches[0].clientX);
-    }
-}, { passive: true });
+// Отслеживаем любые типы указателей (мышь, палец, стилус)
+window.addEventListener('pointermove', (e) => {
+    handleMove(e.clientX);
+});
 
 function spawnItem() {
     if (gameOver) return;
@@ -56,7 +56,7 @@ function spawnItem() {
     items.push({
         x: Math.random() * (canvas.width - 40) + 20,
         y: -30,
-        speed: Math.random() * 2 + 2,
+        speed: Math.random() * 2 + 2.5, // Немного ускорили падение для динамики
         text: randType.text,
         type: randType.type,
         score: randType.score,
@@ -81,9 +81,9 @@ function updateGame() {
         ctx.font = `${item.size}px Arial`;
         ctx.fillText(item.text, item.x - item.size/2, item.y);
 
-        // Проверка ловли предмета
+        // Проверка ловли предмета корзинкой
         if (item.y >= player.y && item.y <= player.y + player.height &&
-            item.x >= player.x - 5 && item.x <= player.x + player.width + 5) {
+            item.x >= player.x - 10 && item.x <= player.x + player.width + 10) {
             
             score += item.score;
             if (score < 0) score = 0;
@@ -91,8 +91,10 @@ function updateGame() {
             
             items.splice(i, 1);
 
+            // ПРОВЕРКА ПОБЕДЫ: Строго при 10 очках или больше
             if (score >= 10) {
                 triggerVictory();
+                return; // Останавливаем цикл отрисовки
             }
             continue;
         }
@@ -102,7 +104,9 @@ function updateGame() {
         }
     }
 
-    requestAnimationFrame(updateGame);
+    if (!gameOver) {
+        requestAnimationFrame(updateGame);
+    }
 }
 
 // Кнопка СТАРТ
@@ -111,6 +115,9 @@ startBtn.addEventListener('click', () => {
     setTimeout(() => {
         startOverlay.style.display = 'none';
         gameOver = false;
+        score = 0;
+        items = [];
+        scoreEl.innerText = score;
         spawnItem();
         updateGame();
     }, 300);
@@ -118,8 +125,11 @@ startBtn.addEventListener('click', () => {
 
 function triggerVictory() {
     gameOver = true;
-    confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+    
+    // Взрыв конфетти
+    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
 
+    // Плавное переключение экранов
     gameWrapper.style.opacity = '0';
     gameWrapper.style.transform = 'scale(0.8)';
     
@@ -130,11 +140,14 @@ function triggerVictory() {
         mainCard.style.opacity = '1';
         mainCard.style.transform = 'scale(1) translateY(0)';
         
+        // Сбрасываем позицию у убегающей кнопки
+        noBtn.style.position = 'absolute';
         noBtn.style.left = '160px';
         noBtn.style.top = '0px';
     }, 500);
 }
 
+// Поведение кнопки "Нет"
 const moveNoButton = () => {
     const padding = 30;
     const maxX = window.innerWidth - noBtn.offsetWidth - padding;

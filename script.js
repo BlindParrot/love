@@ -23,6 +23,7 @@ const itemTypes = [
     { text: '💔', type: 'bad', score: -1 }
 ];
 
+// Плавное управление пальцем/мышкой
 gameArea.addEventListener('pointermove', (e) => {
     if (gameOver) return;
     const rect = gameArea.getBoundingClientRect();
@@ -34,14 +35,11 @@ gameArea.addEventListener('pointermove', (e) => {
     playerBasket.style.left = `${x}px`;
 });
 
-// Кнопка ИГРАТЬ (теперь реагирует моментально)
-startBtn.addEventListener('pointerdown', (e) => {
+// Кнопка ИГРАТЬ запускается МГНОВЕННО
+startBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    startOverlay.style.opacity = '0';
-    setTimeout(() => {
-        startOverlay.style.display = 'none';
-        startGame();
-    }, 150); // Уменьшили задержку анимации меню
+    startOverlay.style.display = 'none';
+    startGame();
 });
 
 function startGame() {
@@ -49,7 +47,10 @@ function startGame() {
     score = 0;
     scoreEl.innerText = score;
     
-    spawnInterval = setInterval(createFallingItem, 750);
+    // Очищаем старые предметы, если были
+    document.querySelectorAll('.falling-item').forEach(el => el.remove());
+    
+    spawnInterval = setInterval(createFallingItem, 700);
     gameLoopInterval = setInterval(updateItems, 1000 / 60);
 }
 
@@ -79,7 +80,7 @@ function updateItems() {
     
     items.forEach(item => {
         let currentTop = parseFloat(item.style.top);
-        currentTop += 3.5; 
+        currentTop += 4; // Чуть ускорили падение для фана
         item.style.top = `${currentTop}px`;
         
         const itemRect = item.getBoundingClientRect();
@@ -106,6 +107,37 @@ function updateItems() {
     });
 }
 
+// Собственный кастомный взрыв салюта на чистом JS
+function nativeConfetti() {
+    const colors = ['🎉', '✨', '💖', '❤️', '💝', '🌸'];
+    for (let i = 0; i < 100; i++) {
+        const particle = document.createElement('div');
+        particle.innerHTML = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.position = 'fixed';
+        particle.style.left = '50vw';
+        particle.style.top = '60vh';
+        particle.style.fontSize = Math.random() * 20 + 15 + 'px';
+        particle.style.zIndex = '999';
+        particle.style.pointerEvents = 'none';
+        particle.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
+        
+        document.body.appendChild(particle);
+        
+        // Сила и направление взрыва во все стороны
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 200 + 50;
+        const x = Math.cos(angle) * velocity;
+        const y = Math.sin(angle) * velocity;
+        
+        setTimeout(() => {
+            particle.style.transform = `translate(${x}px, ${y}px) scale(0.5)`;
+            particle.style.opacity = '0';
+        }, 50);
+        
+        setTimeout(() => particle.remove(), 1050);
+    }
+}
+
 function triggerVictory() {
     gameOver = true;
     clearInterval(spawnInterval);
@@ -113,12 +145,8 @@ function triggerVictory() {
     
     document.querySelectorAll('.falling-item').forEach(el => el.remove());
     
-    // Безопасный вызов салюта
-    if (typeof confetti === 'function') {
-        try {
-            confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
-        } catch(err) {}
-    }
+    // Взрываем наш собственный салют
+    nativeConfetti();
 
     gameWrapper.style.opacity = '0';
     gameWrapper.style.transform = 'scale(0.8)';
@@ -166,7 +194,7 @@ function createHeart() {
     setTimeout(() => { heart.remove(); }, duration * 1000);
 }
 
-yesBtn.addEventListener('pointerdown', (e) => {
+yesBtn.addEventListener('click', (e) => {
     e.preventDefault();
     noBtn.remove();
     title.innerHTML = 'Ура-а-а! Ты прошла игру и сделала меня самым счастливым! 🥰 Напиши мне скорее! 💖';
@@ -174,16 +202,6 @@ yesBtn.addEventListener('pointerdown', (e) => {
     mainCard.style.transform = 'scale(1.05)';
     mainCard.style.borderColor = '#ff4d6d';
     
-    if (typeof confetti === 'function') {
-        try {
-            confetti({
-                particleCount: 200,
-                spread: 100,
-                origin: { y: 0.6 },
-                colors: ['#ff4d6d', '#ff758f', '#ff85a1', '#2ecc71']
-            });
-        } catch(err) {}
-    }
-    
+    nativeConfetti();
     setInterval(createHeart, 150);
 });

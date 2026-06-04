@@ -1,7 +1,7 @@
 const gameWrapper = document.getElementById('gameWrapper');
+const gameArea = document.getElementById('gameArea');
+const playerBasket = document.getElementById('playerBasket');
 const mainCard = document.getElementById('mainCard');
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const startOverlay = document.getElementById('startOverlay');
 const startBtn = document.getElementById('startBtn');
@@ -11,12 +11,11 @@ const yesBtn = document.getElementById('yesBtn');
 const title = document.getElementById('title');
 const heartsContainer = document.getElementById('heartsContainer');
 
-canvas.width = 320;
-canvas.height = 400;
-
 let score = 0;
-let gameOver = true; // Изначально игра стоит на паузе
-let items = [];
+let gameOver = true;
+let gameLoopInterval;
+let spawnInterval;
+
 const itemTypes = [
     { text: '❤️', type: 'good', score: 1 },
     { text: '💖', type: 'good', score: 1 },
@@ -24,112 +23,106 @@ const itemTypes = [
     { text: '💔', type: 'bad', score: -1 }
 ];
 
-const player = {
-    x: canvas.width / 2 - 35,
-    y: canvas.height - 50,
-    width: 70,
-    height: 30,
-    emoji: '🧺'
-};
-
-// УНИВЕРСАЛЬНОЕ УПРАВЛЕНИЕ ДЛЯ ПК И ТЕЛЕФОНОВ
-const handleMove = (clientX) => {
+// Управление для мобилок и ПК без лагов через Pointer Events
+gameArea.addEventListener('pointermove', (e) => {
     if (gameOver) return;
-    const rect = canvas.getBoundingClientRect();
-    // Вычисляем позицию относительно холста с учетом его реального масштаба на экране
-    const rootX = (clientX - rect.left) * (canvas.width / rect.width);
-    player.x = rootX - player.width / 2;
+    const rect = gameArea.getBoundingClientRect();
+    let x = e.clientX - rect.left;
     
-    // Ограничиваем движение рамками экрана
-    if (player.x < 0) player.x = 0;
-    if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
-};
-
-// Отслеживаем любые типы указателей (мышь, палец, стилус)
-window.addEventListener('pointermove', (e) => {
-    handleMove(e.clientX);
+    // Держим корзинку внутри игрового поля
+    if (x < 30) x = 30;
+    if (x > rect.width - 30) x = rect.width - 30;
+    
+    playerBasket.style.left = `${x}px`;
 });
 
-function spawnItem() {
-    if (gameOver) return;
-    const randType = itemTypes[Math.floor(Math.random() * itemTypes.length)];
-    items.push({
-        x: Math.random() * (canvas.width - 40) + 20,
-        y: -30,
-        speed: Math.random() * 2 + 2.5, // Немного ускорили падение для динамики
-        text: randType.text,
-        type: randType.type,
-        score: randType.score,
-        size: 26
-    });
-    setTimeout(spawnItem, Math.max(350, 850 - score * 40));
-}
-
-function updateGame() {
-    if (gameOver) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Рисуем корзинку
-    ctx.font = "32px Arial";
-    ctx.fillText(player.emoji, player.x, player.y + 25);
-
-    for (let i = items.length - 1; i >= 0; i--) {
-        let item = items[i];
-        item.y += item.speed;
-
-        ctx.font = `${item.size}px Arial`;
-        ctx.fillText(item.text, item.x - item.size/2, item.y);
-
-        // Проверка ловли предмета корзинкой
-        if (item.y >= player.y && item.y <= player.y + player.height &&
-            item.x >= player.x - 10 && item.x <= player.x + player.width + 10) {
-            
-            score += item.score;
-            if (score < 0) score = 0;
-            scoreEl.innerText = score;
-            
-            items.splice(i, 1);
-
-            // ПРОВЕРКА ПОБЕДЫ: Строго при 10 очках или больше
-            if (score >= 10) {
-                triggerVictory();
-                return; // Останавливаем цикл отрисовки
-            }
-            continue;
-        }
-
-        if (item.y > canvas.height + 20) {
-            items.splice(i, 1);
-        }
-    }
-
-    if (!gameOver) {
-        requestAnimationFrame(updateGame);
-    }
-}
-
-// Кнопка СТАРТ
-startBtn.addEventListener('click', () => {
+// Кнопка ИГРАТЬ (работает по первому касанию)
+startBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
     startOverlay.style.opacity = '0';
     setTimeout(() => {
         startOverlay.style.display = 'none';
-        gameOver = false;
-        score = 0;
-        items = [];
-        scoreEl.innerText = score;
-        spawnItem();
-        updateGame();
+        startGame();
     }, 300);
 });
 
+function startGame() {
+    gameOver = false;
+    score = 0;
+    scoreEl.innerText = score;
+    
+    // Запускаем спавн предметов
+    spawnInterval = setInterval(createFallingItem, 750);
+    // Запускаем обсчет физики (60 кадров в секунду)
+    gameLoopInterval = setInterval(updateItems, 1000 / 60);
+}
+
+function createFallingItem() {
+    if (gameOver) return;
+    
+    const item = document.createElement('div');
+    item.classList.add('falling-item');
+    
+    const randType = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+    item.innerHTML = randType.text;
+    item.dataset.type = randType.type;
+    item.dataset.score = randType.score;
+    
+    const areaWidth = gameArea.clientWidth;
+    item.style.left = `${Math.random() * (areaWidth - 40) + 10}px`;
+    item.style.top = '-40px';
+    
+    gameArea.appendChild(item);
+}
+
+function updateItems() {
+    if (gameOver) return;
+    
+    const items = document.querySelectorAll('.falling-item');
+    const basketRect = playerBasket.getBoundingClientRect();
+    
+    items.forEach(item => {
+        let currentTop = parseFloat(item.style.top);
+        // Скорость падения
+        currentTop += 3.5; 
+        item.style.top = `${currentTop}px`;
+        
+        const itemRect = item.getBoundingClientRect();
+        
+        // Проверка коллизии (пересечения с корзинкой)
+        if (itemRect.bottom >= basketRect.top && 
+            itemRect.top <= basketRect.bottom && 
+            itemRect.right >= basketRect.left && 
+            itemRect.left <= basketRect.right) {
+            
+            score += parseInt(item.dataset.score);
+            if (score < 0) score = 0;
+            scoreEl.innerText = score;
+            
+            item.remove();
+            
+            if (score >= 10) {
+                triggerVictory();
+            }
+        }
+        
+        // Если улетел ниже экрана
+        if (currentTop > gameArea.clientHeight) {
+            item.remove();
+        }
+    });
+}
+
 function triggerVictory() {
     gameOver = true;
+    clearInterval(spawnInterval);
+    clearInterval(gameLoopInterval);
     
-    // Взрыв конфетти
-    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    // Удаляем все оставшиеся предметы на поле
+    document.querySelectorAll('.falling-item').forEach(el => el.remove());
+    
+    confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
 
-    // Плавное переключение экранов
     gameWrapper.style.opacity = '0';
     gameWrapper.style.transform = 'scale(0.8)';
     
@@ -140,15 +133,15 @@ function triggerVictory() {
         mainCard.style.opacity = '1';
         mainCard.style.transform = 'scale(1) translateY(0)';
         
-        // Сбрасываем позицию у убегающей кнопки
         noBtn.style.position = 'absolute';
-        noBtn.style.left = '160px';
+        noBtn.style.left = '140px';
         noBtn.style.top = '0px';
     }, 500);
 }
 
-// Поведение кнопки "Нет"
-const moveNoButton = () => {
+// Убегающая кнопка "Нет" (с поддержкой тачей для телефонов)
+const moveNoButton = (e) => {
+    if(e) e.preventDefault();
     const padding = 30;
     const maxX = window.innerWidth - noBtn.offsetWidth - padding;
     const maxY = window.innerHeight - noBtn.offsetHeight - padding;
@@ -162,10 +155,7 @@ const moveNoButton = () => {
 };
 
 noBtn.addEventListener('mouseover', moveNoButton);
-noBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    moveNoButton();
-});
+noBtn.addEventListener('touchstart', moveNoButton, { passive: false });
 
 function createHeart() {
     const heart = document.createElement('div');
@@ -173,14 +163,15 @@ function createHeart() {
     const heartTypes = ['❤️', '💖', '💝', '💕', '🥰'];
     heart.innerHTML = heartTypes[Math.floor(Math.random() * heartTypes.length)];
     heart.style.left = Math.random() * 100 + 'vw';
-    heart.style.fontSize = Math.random() * 20 + 15 + 'px';
+    heart.style.fontSize = Math.random() * 15 + 15 + 'px';
     const duration = Math.random() * 2 + 4;
     heart.style.animationDuration = duration + 's';
     heartsContainer.appendChild(heart);
     setTimeout(() => { heart.remove(); }, duration * 1000);
 }
 
-yesBtn.addEventListener('click', () => {
+yesBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
     noBtn.remove();
     title.innerHTML = 'Ура-а-а! Ты прошла игру и сделала меня самым счастливым! 🥰 Напиши мне скорее! 💖';
     yesBtn.style.display = 'none';
